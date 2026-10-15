@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Case Manager Follow-Up Dashboard Prototype</title>
+<style>
+:root{--purple:#5b1f5e;--navy:#17365d;--blue:#2f75b5;--red:#c62828;--amber:#b26a00;--green:#287d3c;--bg:#f5f7fa;--card:#fff;--line:#d9e2f3}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#1f2937}.wrap{max-width:1180px;margin:auto;padding:20px}header{background:linear-gradient(120deg,var(--purple),var(--navy));color:#fff;padding:22px;border-radius:14px}h1{margin:0 0 7px;font-size:27px}header p{margin:0;opacity:.93}.notice{margin:14px 0;padding:10px 13px;background:#fff7df;border-left:5px solid var(--amber);border-radius:7px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.metric,.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px;box-shadow:0 3px 12px #1f293712}.metric strong{display:block;font-size:26px;margin-top:6px}.red{color:var(--red)}.amber{color:var(--amber)}.green{color:var(--green)}.columns{display:grid;grid-template-columns:360px 1fr;gap:14px;margin-top:14px}h2{margin:0 0 12px;color:var(--purple);font-size:19px}label{font-weight:700;font-size:13px;display:block;margin:10px 0 4px}input,select{width:100%;padding:9px;border:1px solid #aab7c4;border-radius:7px;background:#fff}button{margin-top:12px;padding:10px 14px;border:0;border-radius:8px;background:var(--purple);color:#fff;font-weight:700;cursor:pointer}button.secondary{background:#64748b;margin-left:6px}.alert{border-left:6px solid;padding:12px;margin:9px 0;border-radius:8px;background:#fff}.alert.redB{border-color:var(--red);background:#fff0f0}.alert.amberB{border-color:var(--amber);background:#fff8e8}.alert.greenB{border-color:var(--green);background:#eef9f1}.alert h3{margin:0 0 5px;font-size:16px}.alert p{margin:3px 0;font-size:14px}.tag{display:inline-block;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:700;background:#e8edf4;margin-right:5px}.tableWrap{overflow:auto;margin-top:14px}table{width:100%;border-collapse:collapse;background:#fff}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);font-size:13px}th{background:var(--navy);color:#fff}.footer{margin-top:14px;font-size:12px;color:#5f6b76}@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.columns{grid-template-columns:1fr}}@media(max-width:500px){.grid{grid-template-columns:1fr}}
+</style></head>
+<body><div class="wrap">
+<header><h1>Post-Discharge Coordination Dashboard</h1><p>Prototype for a case manager: surfaces overdue follow-up, silent defaults, unacknowledged escalation and workload pressure.</p></header>
+<div class="notice"><b>Prototype only.</b> Uses synthetic data and supports, but does not replace, clinical judgment or local crisis procedures.</div>
+<section class="grid" aria-label="summary metrics">
+<div class="metric"><span>Active cases</span><strong id="mCases">34</strong></div>
+<div class="metric"><span>Overdue first contacts</span><strong id="mOverdue" class="red">1</strong></div>
+<div class="metric"><span>Defaults without escalation</span><strong id="mDefaults" class="red">1</strong></div>
+<div class="metric"><span>High-risk cases without recent activity</span><strong id="mRisk" class="amber">1</strong></div>
+</section>
+<div class="columns">
+<section class="panel"><h2>Case input</h2>
+<label for="caseId">Anonymous case ID</label><input id="caseId" value="CM-1042">
+<label for="days">Days since discharge</label><input id="days" type="number" min="0" value="4">
+<label for="risk">Suicide risk identified at discharge?</label><select id="risk"><option value="yes">Yes</option><option value="no">No</option></select>
+<label for="attempt">Documented follow-up attempt?</label><select id="attempt"><option value="no">No</option><option value="yes">Yes</option></select>
+<label for="appt">First appointment status</label><select id="appt"><option value="missed">Scheduled date passed; no attendance record</option><option value="future">Scheduled in future</option><option value="attended">Attended</option><option value="none">Not scheduled</option></select>
+<label for="escalation">Escalation documented?</label><select id="escalation"><option value="no">No</option><option value="yes">Yes</option></select>
+<label for="ack">Escalation acknowledged?</label><select id="ack"><option value="no">No</option><option value="yes">Yes</option><option value="na">Not applicable</option></select>
+<label for="caseload">Case manager active caseload</label><input id="caseload" type="number" min="0" value="34">
+<button id="evaluate">Evaluate coordination risk</button><button class="secondary" id="reset">Reset</button>
+</section>
+<section class="panel"><h2>Priority output</h2><div id="output" aria-live="polite"></div></section>
+</div>
+<section class="panel tableWrap"><h2>Metrics and prototype thresholds</h2><table><thead><tr><th>Metric</th><th>What it measures</th><th>Why it matters</th><th>Prototype flag</th></tr></thead><tbody>
+<tr><td>Time to first documented contact</td><td>Elapsed time since discharge with no attempt</td><td>Catches absent or late follow-up</td><td>Risk-based: over 48h; otherwise over 72h</td></tr>
+<tr><td>Unassigned handoff</td><td>No acknowledged owner or backup</td><td>Prevents work sitting between teams</td><td>Any open handoff</td></tr>
+<tr><td>Default without escalation</td><td>Missed first visit with no recorded escalation</td><td>Catches silent disengagement</td><td>Any missed visit without escalation</td></tr>
+<tr><td>Escalation not acknowledged</td><td>Escalation recorded but not accepted</td><td>Shows an unresolved handoff</td><td>Any unacknowledged escalation</td></tr>
+<tr><td>High-risk case without recent activity</td><td>High-risk discharge with no timely contact</td><td>Prioritises risk-sensitive coordination</td><td>No attempt within 48h</td></tr>
+<tr><td>Caseload pressure</td><td>Active cases assigned to case manager</td><td>Provides workload context</td><td>Display context; local service sets threshold</td></tr>
+</tbody></table></section>
+<p class="footer">Synthetic prototype. Do not enter names, contact details, medical record numbers or other patient-identifying information.</p>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+function evaluate(){
+ const id=$('caseId').value.trim()||'Anonymous case'; const days=Number($('days').value||0); const high=$('risk').value==='yes'; const attempted=$('attempt').value==='yes'; const appt=$('appt').value; const esc=$('escalation').value==='yes'; const ack=$('ack').value; const load=Number($('caseload').value||0);
+ const limitHours=high?48:72; const overdue=!attempted && days*24>limitHours; const missed=appt==='missed'; const alerts=[];
+ if(overdue) alerts.push({level:'redB',title:'Overdue first follow-up',why:`${id} has no documented contact attempt ${days} days after discharge. The prototype threshold is ${limitHours} hours.`,action:'Named case manager: attempt contact now, document the attempt and complete risk review. If contact fails, activate the approved failed-contact and escalation pathway.'});
+ if(missed&&!esc) alerts.push({level:'redB',title:'Default without documented escalation',why:'The first appointment date has passed and no attendance or escalation is recorded.',action:'Case manager: flag the default, notify the responsible clinician, review risk and begin re-engagement on the same working day.'});
+ if(esc&&ack==='no') alerts.push({level:'amberB',title:'Escalation not acknowledged',why:'An escalation exists but the receiving role has not accepted the next action.',action:'Escalate to the duty lead or service manager and assign the backup owner; record the response deadline.'});
+ if(high&&!attempted) alerts.push({level:'amberB',title:'High-risk case without recent activity',why:'Risk was identified at discharge and no follow-up attempt is documented.',action:'Prioritise immediate contact and clinical risk review; follow local crisis procedures when indicated.'});
+ if(appt==='none') alerts.push({level:'amberB',title:'First appointment not scheduled',why:'No first outpatient or TCU appointment is recorded.',action:'Receiving outpatient team: schedule the first visit and document ownership and date.'});
+ if(!alerts.length) alerts.push({level:'greenB',title:'No current coordination flag',why:'The entered data do not breach the prototype rules.',action:'Continue monitoring and confirm all records, ownership and next review points are complete.'});
+ const rank={redB:0,amberB:1,greenB:2}; alerts.sort((a,b)=>rank[a.level]-rank[b.level]);
+ $('output').innerHTML=alerts.map((a,i)=>`<div class="alert ${a.level}"><h3>${i+1}. ${a.title}</h3><p><b>Why surfaced:</b> ${a.why}</p><p><b>Recommended next action:</b> ${a.action}</p></div>`).join('')+`<div><span class="tag">Caseload: ${load}</span><span class="tag">Rules evaluated: follow-up, default, escalation, risk</span></div>`;
+ $('mCases').textContent=load; $('mOverdue').textContent=overdue?1:0; $('mDefaults').textContent=missed&&!esc?1:0; $('mRisk').textContent=high&&!attempted?1:0;
+}
+$('evaluate').addEventListener('click',evaluate); $('reset').addEventListener('click',()=>{location.reload()}); evaluate();
+</script></body></html>
